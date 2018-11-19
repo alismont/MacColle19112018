@@ -40,9 +40,23 @@ int IMAGE = 0;
 char charVal[10];
 int LU = 0;
 
-int Rayon = 45;   //Variable to store data read from EEPROM.
+//eeprom
+int Rayon = 45;
 int MemoRayon = 45;
-int eeAddress = 0; //EEPROM address to start reading from
+
+float xptspixel = 0.067979;
+float Memoxptspixel = 0.067979;
+float DecalX = 260.9;
+float MemoDecalX = 260.9;
+float XHome = 49.9;
+float MemoXHome = 49.9;
+
+float yptspixel = 0.067979;
+float Memoyptspixel = 0.067979;
+float DecalY = 798.0;
+float MemoDecalY = 798.0;
+float YHome = 30.4;
+float MemoYHome = 30.4;
 
 // *****************************************************************************************************************SETUP
 void setup() {
@@ -52,10 +66,25 @@ void setup() {
   pinMode(BP_START, INPUT_PULLUP);
   Serial.println("test");
   //*******************************************************************************************************************eeprom
-  //EEPROM.put(eeAddress, Rayon);
+  //EEPROM.put(0, Rayon);
   EEPROM.get(0, Rayon);
+
+  // EEPROM.put(1, xptspixel);
+  // EEPROM.put(2, DecalX);
+  // EEPROM.put(3, XHome);
+  EEPROM.get(1, xptspixel);
+  EEPROM.get(2, DecalX);
+  EEPROM.get(3, XHome);
+
+
   //********************************************************************************************************************Virtuino settings
   virtuino.DEBUG = false;                       // set this value TRUE to enable the serial monitor status
+  //EEPROM.put(4, yptspixel);
+  //EEPROM.put(5, DecalY);
+  //EEPROM.put(6, YHome);
+  EEPROM.get(4, yptspixel);
+  EEPROM.get(5, DecalY);
+  EEPROM.get(6, YHome);
   virtuino.password = "12345678";
 
   initAccessPoint();
@@ -64,10 +93,10 @@ void setup() {
 
 // ********************************************************************************************************************LOOP
 void loop() {
-//  while (LU == 0) {
-//    //ATTENDRE
-//    RS();
-//  }
+  //  while (LU == 0) {
+  //    //ATTENDRE
+  //    RS();
+  //  }
 
   virtuino.run();
   //*******************************************************************************************************************LECTURE ECRITURE VIRTUINO
@@ -103,8 +132,9 @@ void loop() {
   }
 
   //*********************************************************************************************************GESTION VALEUR DE POSITIONNEMENT
+
   // Lecture Rayon dans HMI
-  Rayon = virtuino.vDigitalMemoryRead(4);
+  Rayon = virtuino.vMemoryRead(2);
   if (Rayon !=  MemoRayon) {
     MemoRayon = Rayon;
     //envoie vers processing
@@ -112,7 +142,59 @@ void loop() {
     EEPROM.put(0, Rayon);
   }
 
+  // Lecture xptspixel dans HMI
+  xptspixel =  virtuino.vMemoryRead(3);
+  if (xptspixel !=  Memoxptspixel) {
+    Memoxptspixel = xptspixel;
+    //envoie vers processing
+    Lecture();
+    EEPROM.put(1, xptspixel);
+  }
 
+  // Lecture DecalX dans HMI
+  DecalX =  virtuino.vMemoryRead(4);
+  if (DecalX !=  MemoDecalX) {
+    MemoDecalX = DecalX;
+    //envoie vers processing
+    Lecture();
+    EEPROM.put(2, DecalX);
+  }
+
+    // Lecture XHome dans HMI
+  XHome =  virtuino.vMemoryRead(5);
+  if (XHome !=  MemoXHome) {
+    MemoXHome = XHome;
+    //envoie vers processing
+    Lecture();
+    EEPROM.put(3, XHome);
+  }
+
+   // Lecture yptspixel dans HMI
+  yptspixel =  virtuino.vMemoryRead(6);
+  if (yptspixel !=  Memoyptspixel) {
+    Memoyptspixel = yptspixel;
+    //envoie vers processing
+    Lecture();
+    EEPROM.put(4, yptspixel);
+  }
+
+  // Lecture DecalX dans HMI
+  DecalY =  virtuino.vMemoryRead(7);
+  if (DecalY !=  MemoDecalY) {
+    MemoDecalY = DecalY;
+    //envoie vers processing
+    Lecture();
+    EEPROM.put(5, DecalY);
+  }
+
+    // Lecture YHome dans HMI
+  YHome =  virtuino.vMemoryRead(8);
+  if (YHome !=  MemoYHome) {
+    MemoYHome = YHome;
+    //envoie vers processing
+    Lecture();
+    EEPROM.put(6, YHome);
+  }
   // ********************************************************************************************************ONS BP START
   if (BPV_START) {                              // a remplacer par des BPs
     if (!ons1) {  //---bit ons
@@ -214,6 +296,30 @@ void Lecture() {
   Tram = Tram + "=";
 
   dtostrf( BPV_STOP, 1, 0, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( xptspixel, 10, 10, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( DecalX, 6, 2, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( XHome, 6, 2, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+  
+  dtostrf( yptspixel, 10, 10, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( DecalY, 6, 2, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( YHome, 6, 2, charVal);
   Tram = Tram  +  charVal;
   Tram = Tram + "=";
 

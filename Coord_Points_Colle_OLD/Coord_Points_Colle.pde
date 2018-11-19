@@ -904,11 +904,17 @@ void SerialEventTest(Serial myPort2) {
   String data=myPort2.readString();
   if (data!=null) {
     String[] vals = split(trim(data), '='); 
-    //println(vals.length);
-    if (vals.length==4) {
+    println(vals.length);
+    if (vals.length==10) {
       tag[0]=vals[0];
       tag[1]=vals[1];
       tag[2]=vals[2];
+      tag[3]=vals[3];
+      tag[4]=vals[4];
+      tag[5]=vals[5];
+      tag[6]=vals[6];
+      tag[7]=vals[7];
+      tag[8]=vals[8];
     }
   }
 
@@ -945,6 +951,36 @@ void AffichageTags(String[] tags) {
         Sequence=0;
       }
     }
+  }
+  //********************************************TRAITEMENT DU xptspixel
+  if (tags[3] != null) {
+   // text ("xptspixel="+tags[3], 220, 80);
+    xptspixel=0.067979;//float(tags[3]);
+  }
+  //********************************************TRAITEMENT DU DecalX
+  if (tags[4] != null) {
+    text ("DecalX="+tags[4], 220, 100);
+    DecalX=float(tags[4]);
+  }
+    //********************************************TRAITEMENT DU DecalX
+  if (tags[5] != null) {
+    text ("XHome="+tags[5], 220, 120);
+    XHome=float(tags[5]);
+  }
+    //********************************************TRAITEMENT DU xptspixel
+  if (tags[6] != null) {
+    //text ("yptspixel="+tags[6], 220, 140);
+    yptspixel=0.067979;//float(tags[6]);
+  }
+  //********************************************TRAITEMENT DU DecalX
+  if (tags[7] != null) {
+    text ("DecalY="+tags[7], 220, 160);
+    DecalY=float(tags[7]);
+  }
+    //********************************************TRAITEMENT DU DecalX
+  if (tags[8] != null) {
+    text ("YHome="+tags[8], 220, 180);
+    YHome=float(tags[8]);
   }
 }
 //++++++++++++++++++++++++++++++++
