@@ -159,7 +159,15 @@ boolean Calcul_Points_Colle_OK;
 boolean Home_OK=false;
 boolean Reset_OK=false;
 
+boolean MemoJOGXM=false;
+boolean MemoJOGXP=false;
+boolean MemoJOGYM=false;
+boolean MemoJOGYP=false;
+boolean MemoJOGZM=false;
+boolean MemoJOGZP=false;
+
 Serial myPort, myPort2;
+
 int octetReception;
 char caracter;
 String chainerec;
@@ -168,7 +176,8 @@ char caracter2;
 String chainerec2;
 int Sequence=0;
 int lf=10;
-int CptPieces;
+int CptPieces=0;
+int CptpPrg=2;
 String CoordX, CoordY, CoordZ;
 String CoordCTX;
 String CoordCTY;
@@ -179,7 +188,7 @@ String CoordCTZ;
 //int DecalX=985;
 //float yptspixel=1.007;
 //int DecalY=197;
-//int SequencePos=0;
+
 String inBuffer="";
 
 String IndexCentre="1";
@@ -190,14 +199,19 @@ int op_mode=0;
 int result=0;
 int DefautDetection=0;
 
-int STARTFIXE=0;
-int STARTFLASH=0;
 
 boolean SequenceZero=true;
 boolean Fin=false;
 String inString;
 String[] tag = new String[20]; 
-
+int fintest=0;
+boolean JOGXP =false;
+boolean JOGXM =false;
+boolean JOGYP =false;
+boolean JOGYM =false;
+boolean JOGZP =false;
+boolean JOGZM =false;
+String Avance="1.0";
 //---------------SETUP----------------------------------------------------------------------------------------------SETUP
 void setup() {
   size(3872, 2592);//size(6000, 4000);
@@ -207,10 +221,10 @@ void setup() {
 
   //photo = loadImage("Ce PC/S1/Stockage amovible/DCIM/102NC1S1/DSC_1228.jpg");
   //exec("C:/Aurel/mACVALVES/Asbuilt/Coord_Points_Colle/data/test.bat"); 
-  myPort = new Serial(this, Serial.list()[33], 115200); //USB1
+  myPort = new Serial(this, Serial.list()[32], 115200); //USB1
   myPort.bufferUntil(lf);
   //delay(10000);
-  myPort2 = new Serial(this, Serial.list()[32], 115200);//USB0
+  myPort2 = new Serial(this, Serial.list()[33], 115200);//USB0
   myPort2.bufferUntil(lf);
   while (myPort2.available()>0 ) {
     String data=myPort2.readString();
@@ -285,11 +299,21 @@ void setup() {
 
 //----------------DRAW-----------------------------------------------------------------------------------------------DRAW
 void draw() {
-
-  //if (LU==0) {
-  //  LU=1;
-  //  myPort2.write("LU=");
-  //}
+  background(0, 0, 0);
+  text ("Rayon="+Rayon, 220, 20);
+  // text ("xptspixel="+tags[3], 220, 80);
+  text ("DecalX="+DecalX, 220, 100);
+  text ("XHome="+XHome, 220, 120);
+  //text ("yptspixel="+tags[6], 220, 140);
+  text ("DecalY="+DecalY, 220, 160);
+  text ("YHome="+YHome, 220, 180);
+  text ("CptpPrg="+ CptpPrg, 220, 200);
+  text ("BP_JOG_XP="+JOGXP, 220, 220);
+  text ("BP_JOG_XM="+JOGXM, 220, 240);
+  text ("BP_JOG_YP="+JOGYP, 220, 260);
+  text ("BP_JOG_YM="+JOGYM, 220, 280);
+  text ("BP_JOG_ZP="+JOGZP, 220, 300);
+  text ("BP_JOG_ZM="+JOGZM, 220, 320);
   //*****************************************************************************************************************GESTION ARDUINO
   if (Sequence>0 & SequenceZero) {
     SequenceZero=false;
@@ -299,60 +323,122 @@ void draw() {
   while (myPort2.available()>0 ) {
     SerialEventTest(myPort2);
   }
+  //******************************************************************************GESTION JOG X /Y Z
+  //**AXE X
+  if (Sequence==0 & SequencePos==0) {
+    if (JOGXP) {
+      MemoJOGXP=true;
+      myPort.write("$J="); 
+      myPort.write('\r');
+      myPort.write("G91");
+      myPort.write('\r');
+      myPort.write("G0X"+Avance);
+      myPort.write('\r');
+    } else {
+      if (MemoJOGXP==true) {
+        //myPort.write("!");
+        //myPort.write('\r');
+        MemoJOGXP=false;
+      }
+    }
+    if (JOGXM) {
+      MemoJOGXM=true;
+      myPort.write("$J="); 
+      myPort.write('\r');
+      myPort.write("G91");
+      myPort.write('\r');
+      myPort.write("G0X-"+Avance);
+      myPort.write('\r');
+    } else {
+      if (MemoJOGXM==true) {
+        //myPort.write("!");
+        //myPort.write('\r');
+        MemoJOGXM=false;
+      }
+    }
+    //**AXE Y
+    if (JOGYP) {
+      MemoJOGYP=true;
+      myPort.write("$J="); 
+      myPort.write('\r');
+      myPort.write("G91");
+      myPort.write('\r');
+      myPort.write("G0Y"+Avance);
+      myPort.write('\r');
+    } else {
+      if (MemoJOGYP==true) {
+        //myPort.write("!");
+        //myPort.write('\r');
+        MemoJOGYP=false;
+      }
+    }
+    if (JOGYM) {
+      MemoJOGYM=true;
+      myPort.write("$J="); 
+      myPort.write('\r');
+      myPort.write("G91");
+      myPort.write('\r');
+      myPort.write("G0Y-"+Avance);
+      myPort.write('\r');
+    } else {
+      if (MemoJOGYM==true) {
+        //myPort.write("!");
+        //myPort.write('\r');
+        MemoJOGYM=false;
+      }
+    }
+    //**AXE Z
+    if (JOGZP) {
+      MemoJOGZP=true;
+      myPort.write("$J="); 
+      myPort.write('\r');
+      myPort.write("G91");
+      myPort.write('\r');
+      myPort.write("G0Z0.1");
+      myPort.write('\r');
+    } else {
+      if (MemoJOGZP==true) {
+        //myPort.write("!");
+        //myPort.write('\r');
+        MemoJOGZP=false;
+      }
+    }
+    if (JOGZM) {
+      MemoJOGZM=true;
+      myPort.write("$J="); 
+      myPort.write('\r');
+      myPort.write("G91");
+      myPort.write('\r');
+      myPort.write("G0Z-0.1");
+      myPort.write('\r');
+    } else {
+      if (MemoJOGZM==true) {
+        //myPort.write("!");
+        //myPort.write('\r');
+        MemoJOGZM=false;
+      }
+    }
+  }
 
 
-
-
-  //while (myPort2.available()>0 ) {
-  //  octetReception2 = myPort2.read();
-  //  // println(chainerec2);
-  //  if (octetReception2=='=') {
-  //    if (chainerec2.length()>8) {
-  //      if (chainerec2.substring(0, 9).equals("START....")==true) {
-  //        if (Sequence==0) {
-  //          myPort2.write("STARTFIXE=");
-  //          println("STARTFIXE");
-  //          op_mode=2;
-  //        }
-  //        if (Sequence==12) {
-  //          Sequence=3;
-  //        }
-  //      }
-  //    }
-
-  //    if (chainerec2.length()>7) {
-  //      if (chainerec2.substring(0, 8).equals("STOP....")==true) {
-  //        if (Sequence>0) {
-  //          op_mode=0;
-  //          Sequence=0;
-  //        }
-  //      }
-  //    }
-
-
-  //    //if (chainerec2.length()>5) {
-  //    //  if (chainerec2.substring(0, 5).equals("RAYON")){
-  //    //  println(chainerec2);
-  //    //  }
-  //    //}
-
-  //    println(chainerec2);
-  //    chainerec2="";
-  //  } else {
-  //    caracter2=char(octetReception2);
-  //    chainerec2=chainerec2+caracter2;
-  //  }
+  //if (Sequence==12) {
+  //  myPort2.write("STARTFLASH=");
+  //  println("STARTFLASH");
   //}
 
-  if (Sequence==12) {
-    myPort2.write("STARTFLASH=");
-    println("STARTFLASH");
-  }
-  if (Sequence==0 & !SequenceZero ) {
-    myPort2.write("STARTZERO=");
-    SequenceZero=true;
-    println("STARTZERO");
-  }
+  //if (SequencePos>0 & !STARTFIXE) {
+  //  myPort2.write("STARTFIXE=");
+  //  println("STARTFIXE")
+  //} 
+  //  if (SequencePos==0) {
+  //  myPort2.write("STOPFIXE=");
+  //  println("STOPFIXE");
+  //}
+  //if (Sequence==0 & !SequenceZero ) {
+  //  myPort2.write("STARTZERO=");
+  //  SequenceZero=true;
+  //  println("STARTZERO");
+  //}
 
   //*****************************************************************************************************************GESTION ARDUINO
 
@@ -517,7 +603,7 @@ void draw() {
   case 102: //Test nombre de pieces
     CptPieces=CptPieces+1;
     Sequence=3;
-    if (CptPieces>1) Sequence=103;        //............................ CptPieces
+    if (CptPieces>CptpPrg) Sequence=103;        //............................ CptPieces
 
     break;
 
@@ -603,11 +689,13 @@ void draw() {
   case 3: //Test nombre de pieces
     CptPieces=CptPieces+1;
     SequencePos=1;
-    if (CptPieces>2) SequencePos=31; //......................................cpt piece
+    println(CptPieces);
+    if (CptPieces>(CptpPrg)) SequencePos=31; //......................................cpt piece
 
     break;  
   case 31: //Test nombre de pieces
     CptPieces=0;
+    myPort2.write("STOPFIXE=");
     Trame=("G90G0X10Y100"+'\r');
     myPort.write(Trame); 
     delay(5000);
@@ -653,9 +741,9 @@ void CoordonneeCentre() {
   CentrePieces_CoordX0[2]=676;
   CentrePieces_CoordY0[2]=799;
   CentrePieces_CoordX0[3]=643;
-  CentrePieces_CoordY0[3]=2360;
-  CentrePieces_CoordX0[4]=2363;
-  CentrePieces_CoordY0[4]=2646;
+  CentrePieces_CoordY0[3]=799;
+  CentrePieces_CoordX0[4]=1200;
+  CentrePieces_CoordY0[4]=799;
   CentrePieces_CoordX0[5]=526;
   CentrePieces_CoordY0[5]=2002;
   CentrePieces_CoordX0[6]=1541;
@@ -859,35 +947,6 @@ void mouseClicked() {
 //++++++++++++++++++++++++++++++++
 void CoordonneeG() {
   CoordX=str(int(((Trou_GaucheX[CptPieces]-DecalX)*xptspixel))/10.0);
-  //if (Trou_GaucheX[CptPieces]*xptspixel<10) {
-  //  CoordX="X000"+str(int((Trou_GaucheX[CptPieces]-DecalX)*xptspixel))+"....=";
-  //}
-
-  //if (Trou_GaucheX[CptPieces]*xptspixel>=10 & Trou_GaucheX[CptPieces]*xptspixel<=100) {
-  //  CoordX="X00"+str(int((Trou_GaucheX[CptPieces]-DecalX)*xptspixel))+"....=";
-  //}
-
-  //if (Trou_GaucheX[CptPieces]*xptspixel>100 & Trou_GaucheX [CptPieces]*xptspixel<=1000) {
-  //  CoordX="X0"+str(int((Trou_GaucheX[CptPieces]-DecalX)*xptspixel))+"....=";
-  //}
-
-  //if (Trou_GaucheX[CptPieces]*xptspixel>1000) {
-  //  CoordX="X"+str(int((Trou_GaucheX[CptPieces]-DecalX)*xptspixel))+"....=";
-  //}
-
-
-  //if (Trou_GaucheY[CptPieces]*yptspixel<10) {
-  //  CoordY="Y000"+str(int((Trou_GaucheY[CptPieces]-DecalY)*yptspixel))+"....=";
-  //}
-  //if (Trou_GaucheY[CptPieces]*yptspixel>=10 & Trou_GaucheY [CptPieces]*yptspixel<=100) {
-  //  CoordY="Y00"+str(int((Trou_GaucheY[CptPieces]-DecalY)*yptspixel))+"....=";
-  //}
-  //if (Trou_GaucheY[CptPieces]*yptspixel>100 & Trou_GaucheY [CptPieces]*yptspixel<=1000) {
-  //  CoordY="Y0"+str(int((Trou_GaucheY[CptPieces]-DecalY)*yptspixel))+"....=";
-  //}       
-  //if (Trou_GaucheY[CptPieces]*yptspixel>1000) {
-  //  CoordY="Y"+str(int((Trou_GaucheY[CptPieces]-DecalY)*yptspixel))+"....=";
-  //}
 }
 
 
@@ -902,10 +961,12 @@ void CoordonneeD() {
 //****************************************************************************************************************SERIALEVENT
 void SerialEventTest(Serial myPort2) {
   String data=myPort2.readString();
+  String[] vals = split(trim(data), '='); 
+  println("TRAM:"+ data);
   if (data!=null) {
-    String[] vals = split(trim(data), '='); 
+
     println(vals.length);
-    if (vals.length==10) {
+    if (vals.length==18) {
       tag[0]=vals[0];
       tag[1]=vals[1];
       tag[2]=vals[2];
@@ -915,28 +976,35 @@ void SerialEventTest(Serial myPort2) {
       tag[6]=vals[6];
       tag[7]=vals[7];
       tag[8]=vals[8];
+      tag[9]=vals[9];
+      tag[10]=vals[10];
+      tag[11]=vals[11];
+      tag[12]=vals[12];
+      tag[13]=vals[13];
+      tag[14]=vals[14];
+      tag[15]=vals[15];
+      tag[16]=vals[16];
     }
+    data="";
+    AffichageTags(tag);
   }
-
-  AffichageTags(tag);
 }
 //++++++++++++++++++++++++++++++++
 void AffichageTags(String[] tags) {
   background(0, 0, 0);
   //********************************************TRAITEMENT DU RAYON
   if (tags[0] != null) {
-    text ("Rayon="+tags[0], 220, 20);
-    Rayon=int(tags[0]);
+    //text ("Rayon="+tags[0], 220, 20);
+    Rayon=int(trim(tags[0]));
+    text ("Rayon="+Rayon, 220, 20);
   }
   //********************************************TRAITEMENT BPV_START
   if (tags[1] != null) {
     text ("BPV_START="+tags[1], 220, 40);
-    if (tags[1]=="1") {
-      if (Sequence==0) {
-        //myPort2.write("STARTFIXE=");
-        println("STARTFIXE");
-        op_mode=2;
-      }
+    if (int(trim(tags[1]))==1) {
+      tags[1] = "";
+      myPort2.write("STARTFIXE=");
+      op_mode=2;
       if (Sequence==12) {
         Sequence=3;
       }
@@ -945,8 +1013,10 @@ void AffichageTags(String[] tags) {
   //********************************************TRAITEMENT BPV_STOP
   if (tags[2] != null) {
     text ("BPV_STOP="+tags[2], 220, 60);
-    if (tags[2]=="1") {
-      if (Sequence>0) {
+    if (int(trim(tags[2]))==1) {
+      myPort2.write("STOPFIXE=");
+      tags[2] = "";
+      if (SequencePos>0) {
         op_mode=0;
         Sequence=0;
       }
@@ -954,33 +1024,106 @@ void AffichageTags(String[] tags) {
   }
   //********************************************TRAITEMENT DU xptspixel
   if (tags[3] != null) {
-   // text ("xptspixel="+tags[3], 220, 80);
+    // text ("xptspixel="+tags[3], 220, 80);
     xptspixel=0.067979;//float(tags[3]);
   }
   //********************************************TRAITEMENT DU DecalX
   if (tags[4] != null) {
-    text ("DecalX="+tags[4], 220, 100);
-    DecalX=float(tags[4]);
+    // text ("DecalX="+tags[4], 220, 100);
+    DecalX=float(trim(tags[4]));
+    text ("DecalX="+DecalX, 220, 100);
   }
-    //********************************************TRAITEMENT DU DecalX
+  //********************************************TRAITEMENT DU XHome
   if (tags[5] != null) {
-    text ("XHome="+tags[5], 220, 120);
-    XHome=float(tags[5]);
+    //text ("XHome="+tags[5], 220, 120);
+    XHome=float(trim(tags[5]));
+    text ("XHome="+XHome, 220, 120);
   }
-    //********************************************TRAITEMENT DU xptspixel
+  //********************************************TRAITEMENT DU yptspixel
   if (tags[6] != null) {
     //text ("yptspixel="+tags[6], 220, 140);
     yptspixel=0.067979;//float(tags[6]);
   }
-  //********************************************TRAITEMENT DU DecalX
+  //********************************************TRAITEMENT DU DecalY
   if (tags[7] != null) {
-    text ("DecalY="+tags[7], 220, 160);
-    DecalY=float(tags[7]);
+    // text ("DecalY="+tags[7], 220, 160);
+    DecalY=float(trim(tags[7]));
+    text ("DecalY="+DecalY, 220, 160);
   }
-    //********************************************TRAITEMENT DU DecalX
+  //********************************************TRAITEMENT DU YHome
   if (tags[8] != null) {
-    text ("YHome="+tags[8], 220, 180);
-    YHome=float(tags[8]);
+    // text ("YHome="+tags[8], 220, 180);
+    YHome=float(trim(tags[8]));
+    text ("YHome="+YHome, 220, 180);
+  }
+  //********************************************TRAITEMENT DU CptPieces
+  if (tags[9] != null) {
+    // text ("cptpPrg="+tags[9], 220, 200);
+    //println(tags[9]); 
+    CptpPrg=int(trim(tags[9]));
+    //println(CptpPrg); 
+    text ("CptpPrg="+CptpPrg, 220, 200);
+  }
+  //********************************************TRAITEMENT BP_JOG_X+
+  if (tags[10] != null) {
+    text ("BP_JOG_XP="+tags[10], 220, 220);
+    if (int(trim(tags[10]))==1) {
+      JOGXP=true;
+    } else {
+      JOGXP=false;
+    }
+    //********************************************TRAITEMENT BP_JOG_X+
+    if (tags[11] != null) {
+      text ("BP_JOG_XP="+tags[11], 320, 240);
+      if (int(trim(tags[11]))==1) {
+        JOGXM=true;
+      } else {
+        JOGXM=false;
+      }
+    }
+  }
+  //********************************************TRAITEMENT BP_JOG_Y+
+  if (tags[12] != null) {
+    text ("BP_JOG_YP="+tags[12], 220, 260);
+    if (int(trim(tags[12]))==1) {
+      JOGYP=true;
+    } else {
+      JOGYP=false;
+    }
+    //********************************************TRAITEMENT BP_JOG_Y+
+    if (tags[13] != null) {
+      text ("BP_JOG_YP="+tags[13], 320, 280);
+      if (int(trim(tags[13]))==1) {
+        JOGYM=true;
+      } else {
+        JOGYM=false;
+      }
+    }
+  }
+  //********************************************TRAITEMENT BP_JOG_Z+
+  if (tags[14] != null) {
+    text ("BP_JOG_ZP="+tags[12], 220, 300);
+    if (int(trim(tags[14]))==1) {
+      JOGZP=true;
+    } else {
+      JOGZP=false;
+    }
+    //********************************************TRAITEMENT BP_JOG_Z+
+    if (tags[15] != null) {
+      text ("BP_JOG_ZP="+tags[15], 320, 320);
+      if (int(trim(tags[15]))==1) {
+        JOGZM=true;
+      } else {
+        JOGZM=false;
+      }
+    }
+  }
+
+  //********************************************TRAITEMENT DU Avance Jog
+  if (tags[16] != null) {
+    // text ("YHome="+tags[16], 220, 180);
+    Avance=tags[16];
+    text ("Avance="+Avance, 220, 340);
   }
 }
 //++++++++++++++++++++++++++++++++

@@ -30,16 +30,36 @@ bool ons1 = 1;
 bool ons2 = 1;
 bool ons3 = 1;
 bool ons4 = 1;
+bool ons5 = 1;
+bool ons6 = 1;
+bool ons7 = 1;
+bool ons8 = 1;
+bool ons9 = 1;
+bool ons10 = 1;
+bool ons11 = 1;
+bool ons12 = 1;
+bool ons13 = 1;
+bool ons14 = 1;
+bool ons15 = 1;
+bool ons16 = 1;
+
 int LED_START = 0; // 0=LED ETEINTE , 1=Led ON, 2=Led flash
 int BP_START = 0;
 int Cpt = 0;
 int BP = 0;
 int BPV_START = 0;
 int BPV_STOP = 0;
+int BPJOGXP = 0;
+int BPJOGXM = 0;
+int BPJOGYP = 0;
+int BPJOGYM = 0;
+int BPJOGZP = 0;
+int BPJOGZM = 0;
 int IMAGE = 0;
-char charVal[10];
+char charVal[20];
 int LU = 0;
-
+float Avance = 1;
+float MemoAvance = 1;
 //eeprom
 int Rayon = 45;
 int MemoRayon = 45;
@@ -57,6 +77,8 @@ float DecalY = 798.0;
 float MemoDecalY = 798.0;
 float YHome = 30.4;
 float MemoYHome = 30.4;
+int CptpPrg = 1;
+int MemoCptpPrg = 0;
 
 // *****************************************************************************************************************SETUP
 void setup() {
@@ -82,27 +104,47 @@ void setup() {
   //EEPROM.put(4, yptspixel);
   //EEPROM.put(5, DecalY);
   //EEPROM.put(6, YHome);
+  //EEPROM.put(7,CptpPrg);
   EEPROM.get(4, yptspixel);
   EEPROM.get(5, DecalY);
   EEPROM.get(6, YHome);
+  EEPROM.get(7, CptpPrg);
   virtuino.password = "12345678";
 
   initAccessPoint();
   server.begin();
+
+
 }
 
 // ********************************************************************************************************************LOOP
 void loop() {
-  //  while (LU == 0) {
-  //    //ATTENDRE
-  //    RS();
-  //  }
-
   virtuino.run();
+  if (LU == 0) {
+    virtuino.vMemoryWrite(2, Rayon);
+    virtuino.vMemoryWrite(3, xptspixel);
+    virtuino.vMemoryWrite(4, DecalX);
+    virtuino.vMemoryWrite(5, XHome);
+    virtuino.vMemoryWrite(6, yptspixel);
+    virtuino.vMemoryWrite(7, DecalY);
+    virtuino.vMemoryWrite(8, YHome);
+    virtuino.vMemoryWrite(9, CptpPrg);
+    LU = 1;
+    Lecture();
+  }
+
+
+
   //*******************************************************************************************************************LECTURE ECRITURE VIRTUINO
   BPV_START = virtuino.vDigitalMemoryRead(1);
   BPV_STOP = virtuino.vDigitalMemoryRead(2);
   IMAGE = virtuino.vDigitalMemoryRead(3);
+  BPJOGXP = virtuino.vDigitalMemoryRead(4);
+  BPJOGXM = virtuino.vDigitalMemoryRead(5);
+  BPJOGYP = virtuino.vDigitalMemoryRead(6);
+  BPJOGYM = virtuino.vDigitalMemoryRead(7);
+  BPJOGZP = virtuino.vDigitalMemoryRead(8);
+  BPJOGZM = virtuino.vDigitalMemoryRead(9);
 
   //Base de Temps
   Cpt = Cpt + 1;
@@ -116,15 +158,15 @@ void loop() {
     //Serial.println("Led High");
   }
 
-  if (LED_START == 2) {
-    if (Cpt < 2) {
-      virtuino.vDigitalMemoryWrite(0, 1);                                                                //digitalWrite(LED_START, HIGH);
-      //Serial.println("Led High");
-    } else {
-      virtuino.vDigitalMemoryWrite(0, 0);                                                                //digitalWrite(LED_START, LOW);
-      // Serial.println("Led Low");
-    }
-  }
+  //  if (LED_START == 2) {
+  //    if (Cpt < 2) {
+  //      virtuino.vDigitalMemoryWrite(0, 1);                                                                //digitalWrite(LED_START, HIGH);
+  //      //Serial.println("Led High");
+  //    } else {
+  //      virtuino.vDigitalMemoryWrite(0, 0);                                                                //digitalWrite(LED_START, LOW);
+  //      // Serial.println("Led Low");
+  //    }
+  //  }
 
   if (LED_START == 0) {
     virtuino.vDigitalMemoryWrite(0, 0);                                                                 // digitalWrite(LED_START, LOW);
@@ -160,7 +202,7 @@ void loop() {
     EEPROM.put(2, DecalX);
   }
 
-    // Lecture XHome dans HMI
+  // Lecture XHome dans HMI
   XHome =  virtuino.vMemoryRead(5);
   if (XHome !=  MemoXHome) {
     MemoXHome = XHome;
@@ -169,7 +211,7 @@ void loop() {
     EEPROM.put(3, XHome);
   }
 
-   // Lecture yptspixel dans HMI
+  // Lecture yptspixel dans HMI
   yptspixel =  virtuino.vMemoryRead(6);
   if (yptspixel !=  Memoyptspixel) {
     Memoyptspixel = yptspixel;
@@ -187,13 +229,33 @@ void loop() {
     EEPROM.put(5, DecalY);
   }
 
-    // Lecture YHome dans HMI
+  // Lecture YHome dans HMI
   YHome =  virtuino.vMemoryRead(8);
   if (YHome !=  MemoYHome) {
     MemoYHome = YHome;
     //envoie vers processing
     Lecture();
     EEPROM.put(6, YHome);
+  }
+
+  // Lecture YHome dans HMI
+  CptpPrg  =  virtuino.vMemoryRead(9);
+  if (CptpPrg !=  MemoCptpPrg) {
+    MemoCptpPrg  = CptpPrg;
+    //envoie vers processing
+    Lecture();
+    EEPROM.put(7, CptpPrg);
+
+  }
+
+  // Lecture Avance dans HMI
+  Avance  =  virtuino.vMemoryRead(10);
+  if (Avance !=  MemoAvance) {
+    MemoAvance  = Avance;
+    //envoie vers processing
+    Lecture();
+
+
   }
   // ********************************************************************************************************ONS BP START
   if (BPV_START) {                              // a remplacer par des BPs
@@ -236,6 +298,123 @@ void loop() {
     ons4 = 0;//---bit ons
   }
 
+  //  AXE X
+  if (BPJOGXP) {                             // a remplacer par des BPs
+    if (!ons5) {  //---bit ons
+      ons5 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons5 = 0;//---bit ons
+  }
+
+  if (!BPJOGXP) {                             // a remplacer par des BPs
+    if (!ons6) {  //---bit ons
+      ons6 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons6 = 0;//---bit ons
+  }
+
+  if (BPJOGXM) {                             // a remplacer par des BPs
+    if (!ons7) {  //---bit ons
+      ons7 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons7 = 0;//---bit ons
+  }
+
+  if (!BPJOGXM) {                             // a remplacer par des BPs
+    if (!ons8) {  //---bit ons
+      ons8 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons8 = 0;//---bit ons
+  }
+
+  //  AXE Y
+  if (BPJOGYP) {                             // a remplacer par des BPs
+    if (!ons9) {  //---bit ons
+      ons9 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons9 = 0;//---bit ons
+  }
+  if (!BPJOGYP) {                             // a remplacer par des BPs
+    if (!ons10) {  //---bit ons
+      ons10 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons10 = 0;//---bit ons
+  }
+  if (BPJOGYM) {                             // a remplacer par des BPs
+    if (!ons11) {  //---bit ons
+      ons11 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons11 = 0;//---bit ons
+  }
+  if (!BPJOGYM) {                             // a remplacer par des BPs
+    if (!ons12) {  //---bit ons
+      ons12 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons12 = 0;//---bit ons
+  }
+
+  //  AXE Z
+  if (BPJOGZP) {                             // a remplacer par des BPs
+    if (!ons13) {  //---bit ons
+      ons13 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons13 = 0;//---bit ons
+  }
+  if (!BPJOGZP) {                             // a remplacer par des BPs
+    if (!ons14) {  //---bit ons
+      ons14 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons14 = 0;//---bit ons
+  }
+
+  if (BPJOGZM) {                             // a remplacer par des BPs
+    if (!ons15) {  //---bit ons
+      ons15 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons15 = 0;//---bit ons
+  }
+  if (!BPJOGZM) {                             // a remplacer par des BPs
+    if (!ons16) {  //---bit ons
+      ons16 = 1;
+      Lecture();
+    }
+  }
+  else {
+    ons16 = 0;//---bit ons
+  }
   RS();
   //virtuino.vDelay(200);        // wait 1 seconds
 }
@@ -258,19 +437,23 @@ void RS() {
       if (chaineReceptionProc.substring(0, 9).equals("STARTFIXE") == true)
       {
         LED_START = 1;
-        Serial.write("LED_START 1....=");
-
+        //Serial.write("LED_START 1....=");
       }
-      if (chaineReceptionProc.substring(0, 10).equals("STARTFLASH") == true)
-      {
-        LED_START = 2;
-        Serial.write("LED_START 2....=");
-      }
-
-      if (chaineReceptionProc.substring(0, 9).equals("STARTZERO") == true)
+      if (chaineReceptionProc.substring(0, 8).equals("STOPFIXE") == true)
       {
         LED_START = 0;
+        //Serial.write("LED_START 1....=");
       }
+      //      if (chaineReceptionProc.substring(0, 10).equals("STARTFLASH") == true)
+      //      {
+      //        LED_START = 2;
+      //        //Serial.write("LED_START 2....=");
+      //      }
+
+      //      if (chaineReceptionProc.substring(0, 9).equals("STARTZERO") == true)
+      //      {
+      //        LED_START = 0;
+      //      }
 
 
       chaineReceptionProc = "";
@@ -310,7 +493,7 @@ void Lecture() {
   dtostrf( XHome, 6, 2, charVal);
   Tram = Tram  +  charVal;
   Tram = Tram + "=";
-  
+
   dtostrf( yptspixel, 10, 10, charVal);
   Tram = Tram  +  charVal;
   Tram = Tram + "=";
@@ -320,6 +503,38 @@ void Lecture() {
   Tram = Tram + "=";
 
   dtostrf( YHome, 6, 2, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( CptpPrg, 2, 0, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( BPJOGXP, 1, 0, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( BPJOGXM, 1, 0, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( BPJOGYP, 1, 0, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( BPJOGYM, 1, 0, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( BPJOGZP, 1, 0, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( BPJOGZM, 1, 0, charVal);
+  Tram = Tram  +  charVal;
+  Tram = Tram + "=";
+
+  dtostrf( Avance, 6, 3, charVal);
   Tram = Tram  +  charVal;
   Tram = Tram + "=";
 
@@ -337,3 +552,4 @@ void initAccessPoint() {
   }
   else Serial.println("Failed!");
 }
+
