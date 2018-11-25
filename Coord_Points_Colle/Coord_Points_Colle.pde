@@ -1,4 +1,4 @@
-/*  //<>// //<>// //<>//
+/*  //<>// //<>// //<>// //<>// //<>// //<>//
  Lismont Alain +32497478075
  */
 
@@ -19,7 +19,7 @@ float XHome=49.9;//.. eeadress=3 ...............................................
 
 float yptspixel=0.067979;//.. eeadress=4 ...............................................................yptspixel
 float DecalY=798;//.. eeadress=5 ...............................................................DecalY
-float YHome=30.4;//.. eeadress=6 ...............................................................YHome
+float YHome=31.0;//.. eeadress=6 ...............................................................YHome
 
 float zptspixel=1;
 
@@ -221,10 +221,10 @@ void setup() {
 
   //photo = loadImage("Ce PC/S1/Stockage amovible/DCIM/102NC1S1/DSC_1228.jpg");
   //exec("C:/Aurel/mACVALVES/Asbuilt/Coord_Points_Colle/data/test.bat"); 
-  myPort = new Serial(this, Serial.list()[32], 115200); //USB1
+  myPort = new Serial(this, Serial.list()[33], 115200); //USB1
   myPort.bufferUntil(lf);
   //delay(10000);
-  myPort2 = new Serial(this, Serial.list()[33], 115200);//USB0
+  myPort2 = new Serial(this, Serial.list()[32], 115200);//USB0
   myPort2.bufferUntil(lf);
   while (myPort2.available()>0 ) {
     String data=myPort2.readString();
@@ -290,18 +290,17 @@ void setup() {
   Home_OK=true;
   Reset_OK=true;
   //*******************************************************************************************POSITION PRISE PHOTO
-  myPort.write("G90");
-  myPort.write('\r');
-  myPort.write("G0X5Y5");
-  myPort.write('\r');
+
+
+
 }
 
 
 //----------------DRAW-----------------------------------------------------------------------------------------------DRAW
 void draw() {
-  background(0, 0, 0);
+   background(0, 0, 0);
   text ("Rayon="+Rayon, 220, 20);
-  // text ("xptspixel="+tags[3], 220, 80);
+   //text ("xptspixel="+tags[3], 220, 80);
   text ("DecalX="+DecalX, 220, 100);
   text ("XHome="+XHome, 220, 120);
   //text ("yptspixel="+tags[6], 220, 140);
@@ -323,11 +322,14 @@ void draw() {
   while (myPort2.available()>0 ) {
     SerialEventTest(myPort2);
   }
+
+  //*******************************************************************************LECTURE POSITION DES AXES
+
   //******************************************************************************GESTION JOG X /Y Z
   //**AXE X
   if (Sequence==0 & SequencePos==0) {
     if (JOGXP) {
-      MemoJOGXP=true;
+      MemoJOGXP=true; //<>//
       myPort.write("$J="); 
       myPort.write('\r');
       myPort.write("G91");
@@ -426,10 +428,10 @@ void draw() {
   //  println("STARTFLASH");
   //}
 
-  //if (SequencePos>0 & !STARTFIXE) {
-  //  myPort2.write("STARTFIXE=");
-  //  println("STARTFIXE")
-  //} 
+  ////if (SequencePos>0 & !STARTFIXE) {
+  ////  myPort2.write("STARTFIXE=");
+  ////  println("STARTFIXE");
+  ////} 
   //  if (SequencePos==0) {
   //  myPort2.write("STOPFIXE=");
   //  println("STOPFIXE");
@@ -478,36 +480,41 @@ void draw() {
     myPort.write('\r');
     delay(10000);
 
-    Process p = exec("gphoto2", "--capture-image-and-download");
-    try {
-      result = p.waitFor();
-      print("result photo:");
-      println(result);
-    }
-    catch(InterruptedException e)
-    {
-      e.printStackTrace();
-    } 
+
+    Sequence=11;
+    op_mode=0;
+    myPort2.write("STOPFIXE=");
+
+    //Process p = exec("gphoto2", "--capture-image-and-download");
+    //try {
+    //  result = p.waitFor();
+    //  print("result photo:");
+    //  println(result);
+    //}
+    //catch(InterruptedException e)
+    //{
+    //  e.printStackTrace();
+    //} 
 
 
 
-    p = exec("python", "/home/lismont/Mac/Coord_Points_Colle/batchCopy.py"); 
-    try {
-      result = p.waitFor();
-      print("result save:");
-      println(result);
-    }
-    catch(InterruptedException e)
-    {
-      e.printStackTrace();
-    }
-    if (result==1) {
-      delay(5000);
-      Sequence=1;
-      ;
-    } else {      
-      Sequence=11;
-    }
+    //p = exec("python", "/home/lismont/Mac/Coord_Points_Colle/batchCopy.py"); 
+    //try {
+    //  result = p.waitFor();
+    //  print("result save:");
+    //  println(result);
+    //}
+    //catch(InterruptedException e)
+    //{
+    //  e.printStackTrace();
+    //}
+    //if (result==1) {
+    //  delay(5000);
+    //  Sequence=1;
+    //  ;
+    //} else {      
+    //  Sequence=11;
+    //}
     break;	
 
   case 11: //Transfert photo
@@ -517,13 +524,14 @@ void draw() {
     Calcul_Points_Colle_OK=false;
     Rayon=45;
     Traitement_Image(); 
-    //Sequence=3;
+
+    Sequence=3;
     CptPieces=1;
-    println("---------------------------------------------------");
-    println(Trou_GaucheX[4]);
-    println(Trou_GaucheY[4]);
-    println(Trou_DroitX[4]);
-    println(Trou_DroitY[4]);
+    //println("---------------------------------------------------");
+    //println(Trou_GaucheX[4]);
+    //println(Trou_GaucheY[4]);
+    //println(Trou_DroitX[4]);
+    //println(Trou_DroitY[4]);
     break;      
 
   case 3: //***********************************************************************************Positionnement en X DROIT
@@ -556,14 +564,14 @@ void draw() {
     break;
 
   case 5: //Positionnement en Z descendre
-    Trame=("G90G0Z-2"+'\r');
+    Trame=("G90G0Z-7"+'\r');
     myPort.write(Trame);
     Sequence=6;
     //myPort.write("Z0150....="); 
     //Sequence=51 ;
     break;
   case 6: //Collage
-    delay(500);
+    delay(2000);
     Sequence=7;
     break;
 
@@ -572,7 +580,7 @@ void draw() {
     myPort.write(Trame);
     Sequence=8;
     //myPort.write("Z0000....="); 
-    //delay(500);
+    delay(500);
     //Sequence=71;
     break;
   case 8: //Positionnement en X GAUCHE
@@ -586,12 +594,12 @@ void draw() {
     break;  
 
   case 10: //Positionnement en Z descendre
-    Trame=("G90G0Z-2"+'\r');
+    Trame=("G90G0Z-7"+'\r');
     myPort.write(Trame);
     Sequence=100;
-
+    break;
   case 100: //Collage
-    delay(500);
+    delay(2000);
     Sequence=101;
     break;
 
@@ -599,32 +607,36 @@ void draw() {
     Trame=("G90G0Z0"+'\r');
     myPort.write(Trame);
     Sequence=102;
-
+    delay(2000);
+    break;  
   case 102: //Test nombre de pieces
     CptPieces=CptPieces+1;
     Sequence=3;
     if (CptPieces>CptpPrg) Sequence=103;        //............................ CptPieces
-
     break;
 
 
   case 103: //Test nombre de pieces
 
-    p = exec("python", "/home/pi/Mac/Coord_Points_Colle/EssaiPush.py"); 
-    try {
-      int result = p.waitFor();
-      println(result);
-    }
-    catch(InterruptedException e)
-    {
-      e.printStackTrace();
-    } 
+    //p = exec("python", "/home/pi/Mac/Coord_Points_Colle/EssaiPush.py"); 
+    //try {
+    //  int result = p.waitFor();
+    //  println(result);
+    //}
+    //catch(InterruptedException e)
+    //{
+    //  e.printStackTrace();
+    //} 
+
+    myPort2.write("STOPFIXE=");
     CptPieces=0;
     myPort.write("G90");
     myPort.write('\r');
     myPort.write("G0X10Y100");
     myPort.write('\r');
     Sequence=0;
+    delay(2000);
+    break;
   }
   //print("Sequence:");
   // println(Sequence); 
@@ -660,7 +672,7 @@ void draw() {
     break;
 
   case 22: //Positionnement en Z descendre
-    Trame=("G90G0Z-2"+'\r');
+    Trame=("G90G0Z-8"+'\r');
     myPort.write(Trame); 
     delay(5000);
     SequencePos=23;
@@ -736,16 +748,16 @@ void CoordonneeCentre() {
   // COORDs CENTRE
 
 
-  CentrePieces_CoordX0[1]=261;
-  CentrePieces_CoordY0[1]=798;
+  CentrePieces_CoordX0[1]=263;
+  CentrePieces_CoordY0[1]=811;
   CentrePieces_CoordX0[2]=676;
-  CentrePieces_CoordY0[2]=799;
-  CentrePieces_CoordX0[3]=643;
-  CentrePieces_CoordY0[3]=799;
-  CentrePieces_CoordX0[4]=1200;
-  CentrePieces_CoordY0[4]=799;
-  CentrePieces_CoordX0[5]=526;
-  CentrePieces_CoordY0[5]=2002;
+  CentrePieces_CoordY0[2]=811;
+  CentrePieces_CoordX0[3]=1088;
+  CentrePieces_CoordY0[3]=811;
+  CentrePieces_CoordX0[4]=1505;
+  CentrePieces_CoordY0[4]=811;
+  CentrePieces_CoordX0[5]=1917;
+  CentrePieces_CoordY0[5]=811;
   CentrePieces_CoordX0[6]=1541;
   CentrePieces_CoordY0[6]=1487;
   CentrePieces_CoordX0[7]=2470;
@@ -946,23 +958,30 @@ void mouseClicked() {
 }
 //++++++++++++++++++++++++++++++++
 void CoordonneeG() {
-  CoordX=str(int(((Trou_GaucheX[CptPieces]-DecalX)*xptspixel))/10.0);
+  //CoordX=str(int(((Trou_GaucheX[CptPieces]-DecalX)*xptspixel))/10.0);
+  CoordX=str(XHome+((Trou_GaucheY[CptPieces]-DecalX)*xptspixel)); //ALI CORRECTION
+  CoordY=str(YHome+((Trou_GaucheX[CptPieces]-DecalY)*yptspixel));
 }
 
 
 //++++++++++++++++++++++++++++++++
 void CoordonneeD() {
-  CoordX=str(int(((Trou_DroitX[CptPieces]-DecalX)*xptspixel))/10.0);
+  //CoordX=str(int(((Trou_DroitX[CptPieces]-DecalX)*xptspixel))/10.0);
+  //CoordY=str(int(((Trou_DroitY[CptPieces]-DecalY)*yptspixel))/10);
 
-
-  CoordY=str(int(((Trou_DroitY[CptPieces]-DecalY)*yptspixel))/10);
+  CoordX=str(XHome+((Trou_DroitY[CptPieces]-DecalX)*xptspixel));//ALI CORRECTION
+  CoordY=str(YHome+((Trou_DroitX[CptPieces]-DecalY)*yptspixel));
 }
-
-//****************************************************************************************************************SERIALEVENT
+//****************************************************************************************************************SERIALEVENT MYPORT
+void SerialEventTestCNC(Serial myPort) {
+  String dataCNC=myPort.readString();
+  println("QUOI:"+dataCNC);
+}
+//****************************************************************************************************************SERIALEVENT MPORT2
 void SerialEventTest(Serial myPort2) {
   String data=myPort2.readString();
   String[] vals = split(trim(data), '='); 
-  println("TRAM:"+ data);
+  //println("TRAM:"+ data);
   if (data!=null) {
 
     println(vals.length);
@@ -991,7 +1010,7 @@ void SerialEventTest(Serial myPort2) {
 }
 //++++++++++++++++++++++++++++++++
 void AffichageTags(String[] tags) {
-  background(0, 0, 0);
+  // background(0, 0, 0);
   //********************************************TRAITEMENT DU RAYON
   if (tags[0] != null) {
     //text ("Rayon="+tags[0], 220, 20);
@@ -1004,10 +1023,7 @@ void AffichageTags(String[] tags) {
     if (int(trim(tags[1]))==1) {
       tags[1] = "";
       myPort2.write("STARTFIXE=");
-      op_mode=2;
-      if (Sequence==12) {
-        Sequence=3;
-      }
+      op_mode=1;
     }
   }
   //********************************************TRAITEMENT BPV_STOP
@@ -1058,7 +1074,6 @@ void AffichageTags(String[] tags) {
   }
   //********************************************TRAITEMENT DU CptPieces
   if (tags[9] != null) {
-    // text ("cptpPrg="+tags[9], 220, 200);
     //println(tags[9]); 
     CptpPrg=int(trim(tags[9]));
     //println(CptpPrg); 
@@ -1146,25 +1161,25 @@ void Traitement_Image() {
 
   // ...........................................................................................COORDs CENTRE
   CentrePieces_CoordX0[1]=798;
-  CentrePieces_CoordY0[1]=262;
-  CentrePieces_CoordX0[2]=800;
+  CentrePieces_CoordY0[1]=261;
+  CentrePieces_CoordX0[2]=799;
   CentrePieces_CoordY0[2]=677;
-  CentrePieces_CoordX0[3]=643;
-  CentrePieces_CoordY0[3]=2360;
-  CentrePieces_CoordX0[4]=2363;
-  CentrePieces_CoordY0[4]=2646;
-  CentrePieces_CoordX0[5]=526;
-  CentrePieces_CoordY0[5]=2002;
-  CentrePieces_CoordX0[6]=1541;
-  CentrePieces_CoordY0[6]=1487;
-  CentrePieces_CoordX0[7]=2470;
-  CentrePieces_CoordY0[7]=496;
-  CentrePieces_CoordX0[8]=2805;
-  CentrePieces_CoordY0[8]=500;
-  CentrePieces_CoordX0[9]=3139;
-  CentrePieces_CoordY0[9]=504;
-  CentrePieces_CoordX0[10]=3471;
-  CentrePieces_CoordY0[10]=508;
+  CentrePieces_CoordX0[3]=801;
+  CentrePieces_CoordY0[3]=1088;
+  CentrePieces_CoordX0[4]=800;
+  CentrePieces_CoordY0[4]=1500;
+  CentrePieces_CoordX0[5]=801;
+  CentrePieces_CoordY0[5]=1910;
+  CentrePieces_CoordX0[6]=805;
+  CentrePieces_CoordY0[6]=2315;
+  CentrePieces_CoordX0[7]=1078;
+  CentrePieces_CoordY0[7]=258;
+  CentrePieces_CoordX0[8]=1079;
+  CentrePieces_CoordY0[8]=673;
+  CentrePieces_CoordX0[9]=1079;
+  CentrePieces_CoordY0[9]=1086;
+  CentrePieces_CoordX0[10]=1081;
+  CentrePieces_CoordY0[10]=1498;
 
 
   //CentrePieces_CoordX0[1]=1692;CentrePieces_CoordY0[1]=1148;
@@ -1193,10 +1208,11 @@ void Traitement_Image() {
 
 
 
-  CentrePieces_CoordX0[11]=1060;
-  CentrePieces_CoordY0[11]=601;
-  CentrePieces_CoordX0[12]=644;
-  CentrePieces_CoordY0[12]=1027;
+  CentrePieces_CoordX0[11]=1079;
+  CentrePieces_CoordY0[11]=1905;
+  CentrePieces_CoordX0[12]=1079;
+  CentrePieces_CoordY0[12]=2317;
+  
   CentrePieces_CoordX0[13]=1073;
   CentrePieces_CoordY0[13]=422;
   CentrePieces_CoordX0[14]=1388;
@@ -1341,7 +1357,7 @@ void Traitement_Image() {
   CentrePieces_CoordY0[80]=2279;
 
   // boucle pour les pieces
-  while (PTS <5) {  //................................................................PTS
+  while (PTS < CptpPrg+1) { //CptpPrg) {  //................................................................PTS
     println("PTS"+PTS);
 
     //...................................................................................INIT VARIABLES
@@ -1352,7 +1368,7 @@ void Traitement_Image() {
     Radian_Max=-10000;
     Radian_Min=10000;
     //....................................................................................Point central pièce
-    x0=CentrePieces_CoordX0[PTS] ;
+    x0=CentrePieces_CoordX0[PTS] ; 
     y0=CentrePieces_CoordY0[PTS] ;
     //println("X0:"+x0);
     //println("y0:"+y0);
@@ -1498,7 +1514,7 @@ void Traitement_Image() {
     //****************** CALCUL POINT OPPOSE*****************************     
     x= ceil(x0 + Rayon * cos(Radian_deux));
     y = y0-(ceil( y0 + Rayon * sin(Radian_deux))-y0);
-    Trou_GaucheX[PTS]=x;
+    Trou_GaucheX[PTS]=x; 
     Trou_GaucheY[PTS]=y;
     set(x, y, rouge);
     ellipse(x, y, 5, 5); 
@@ -1518,7 +1534,7 @@ void Traitement_Image() {
   saveFrame("data/outputImage.jpg");
   //photo = loadImage("Lot_piece.jpg");
   //image(photo, 0, 0);
-  //background(photo);
+  // background(photo);
   Calcul_Points_Colle_OK=false;
 }
 
@@ -1545,7 +1561,7 @@ void controlEvent(ControlEvent theEvent) {
 public void START(int theValue) {
   println("START: "+theValue);
   if (PrgStart) {
-    op_mode=2;
+    //op_mode=2;
     //myPort.write("$");
     myPort.write(0x18);   
     myPort.write('\r');
